@@ -12,18 +12,24 @@ const help_text =
     \\ Uses load library to inject a dll into a running process.
 ;
 
-fn inject(pid: win.DWORD, dll_path: []const u16) !void {
+fn inject(pid: win.DWORD, dll_path: [:0]const u16) !void {
     const proc_handle = zwin.OpenProcess(zwin.PROCESS_ALL_ACCESS, win.FALSE, pid) orelse return error.OpenProcessFailed;
     defer _ = zwin.CloseHandle(proc_handle);
 
-    const dll_path_mem = zwin.VirtualAllocEx(proc_handle, null, dll_path.len, zwin.MEM_COMMIT, zwin.PAGE_READWRITE) orelse return error.VirtualAllocFailed;
+    const dll_path_mem = zwin.VirtualAllocEx(
+        proc_handle,
+        null,
+        dll_path.len * @sizeOf(std.meta.Child(@TypeOf(dll_path))),
+        zwin.MEM_COMMIT,
+        zwin.PAGE_READWRITE,
+    ) orelse return error.VirtualAllocFailed;
     defer _ = zwin.VirtualFreeEx(proc_handle, dll_path_mem, 0, zwin.MEM_RELEASE);
 
     if (zwin.WriteProcessMemory(
         proc_handle,
         dll_path_mem,
         dll_path.ptr,
-        (dll_path.len + 1) * @sizeOf(std.meta.Child(@TypeOf(dll_path))),
+        dll_path.len * @sizeOf(std.meta.Child(@TypeOf(dll_path))),
         null,
     ) == win.FALSE) {
         return error.WriteProcessMemoryFailed;
@@ -65,7 +71,7 @@ pub fn main() !void {
 
     const proc_name_widened = try std.unicode.utf8ToUtf16LeWithNull(alloc, proc_name);
     const proc_id = proc.getProcessIdByName(proc_name_widened) catch |err| {
-        std.log.err("Failed get PID with name {s}: {any}\n", .{ proc_name, err });
+        std.log.err("Failed to get PID for process name {s}: {any}\n", .{ proc_name, err });
         std.process.exit(1);
     };
 
