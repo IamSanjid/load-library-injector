@@ -35,12 +35,6 @@ fn inject(pid: win.DWORD, dll_path: []const u16) !void {
     defer _ = zwin.CloseHandle(thread);
 
     _ = zwin.WaitForSingleObject(thread, zwin.INFINITE);
-
-    var res: win.DWORD = undefined;
-    if (zwin.GetExitCodeProcess(thread, &res) == win.FALSE) {
-        try std.io.getStdErr().writer().print("Get Exit code failed with result: 0x{x}\n", .{res});
-        return error.ExitCodeIsBad;
-    }
 }
 
 pub fn main() !void {
@@ -75,8 +69,13 @@ pub fn main() !void {
         std.process.exit(1);
     };
 
-    try inject(proc_id, try std.unicode.utf8ToUtf16LeWithNull(alloc, dll_path));
-    try std.io.getStdOut().writer().print("\x1b[32mSuccessfully injected!\x1b[0m\n", .{});
+    const dll_abs_path = try std.fs.cwd().realpathAlloc(alloc, dll_path);
+    const dll_path_widened = try std.unicode.utf8ToUtf16LeWithNull(alloc, dll_abs_path);
+    const stdout = std.io.getStdOut().writer();
+    try stdout.print("Trying to inject: '{s}'\n", .{dll_abs_path});
+
+    try inject(proc_id, dll_path_widened);
+    try stdout.print("\x1b[32mSuccessfully injected!\x1b[0m\n", .{});
 }
 
 test {
