@@ -54,6 +54,16 @@ pub fn main() !void {
         return error.TooManyArguments;
     }
 
+    if (args.len == 1) {
+        try std.io.getStdOut().writer().print("{s}\n", .{help_text});
+        std.process.exit(1);
+    }
+
+    if (args.len < 3 and !eql(u8, "-h", args[1]) and !eql(u8, "--help", args[1])) {
+        try std.io.getStdOut().writer().print("{s}\n", .{help_text});
+        std.process.exit(1);
+    }
+
     var dll_path: []const u8 = undefined;
     var proc_name: []const u8 = undefined;
     for (args[1..], 1..) |arg, i| {
