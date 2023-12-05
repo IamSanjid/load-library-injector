@@ -37,7 +37,7 @@ fn inject(pid: win.DWORD, dll_path: [:0]const u16) !void {
 
     const kernel32 = zwin.GetModuleHandleW(std.unicode.utf8ToUtf16LeStringLiteral("kernel32")) orelse return error.NoKernelModuleHandle;
     const ll = zwin.GetProcAddress(kernel32, "LoadLibraryW") orelse return error.NoLoadLibraryHandle;
-    const thread = zwin.CreateRemoteThread(proc_handle, null, 0, @ptrCast(zwin.LPTHREAD_START_ROUTINE, ll), dll_path_mem, 0, null);
+    const thread = zwin.CreateRemoteThread(proc_handle, null, 0, @as(zwin.LPTHREAD_START_ROUTINE, @ptrCast(ll)), dll_path_mem, 0, null);
     defer _ = zwin.CloseHandle(thread);
 
     _ = zwin.WaitForSingleObject(thread, zwin.INFINITE);
