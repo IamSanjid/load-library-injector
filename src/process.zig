@@ -4,7 +4,7 @@ const win = std.os.windows;
 const zwin = @import("zigwin32").everything;
 
 pub fn getProcessIdByName(proc_name: [:0]const u16) anyerror!win.DWORD {
-    var handle = zwin.CreateToolhelp32Snapshot(zwin.TH32CS_SNAPPROCESS, 0) orelse return error.InvalidSnapshotHandle;
+    const handle = zwin.CreateToolhelp32Snapshot(zwin.TH32CS_SNAPPROCESS, 0) orelse return error.InvalidSnapshotHandle;
     defer _ = zwin.CloseHandle(handle);
 
     var entry: zwin.PROCESSENTRY32W = undefined;
