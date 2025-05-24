@@ -79,14 +79,14 @@ pub fn main() !void {
         }
     }
 
-    const proc_name_widened = try std.unicode.utf8ToUtf16LeWithNull(alloc, proc_name);
+    const proc_name_widened = try std.unicode.utf8ToUtf16LeAllocZ(alloc, proc_name);
     const proc_id = proc.getProcessIdByName(proc_name_widened) catch |err| {
         std.log.err("Failed to get PID for process name {s}: {any}\n", .{ proc_name, err });
         std.process.exit(1);
     };
 
     const dll_abs_path = try std.fs.cwd().realpathAlloc(alloc, dll_path);
-    const dll_path_widened = try std.unicode.utf8ToUtf16LeWithNull(alloc, dll_abs_path);
+    const dll_path_widened = try std.unicode.utf8ToUtf16LeAllocZ(alloc, dll_abs_path);
     const stdout = std.io.getStdOut().writer();
     try stdout.print("Trying to inject: '{s}'\n", .{dll_abs_path});
 

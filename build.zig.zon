@@ -1,11 +1,16 @@
 .{
-    .name = "injector",
+    .name = .injector,
     .version = "0.0.0",
-    .paths = .{""},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+    .fingerprint = 0xafb77859c5b4d406,
     .dependencies = .{
         .zigwin32 = .{
             .url = "https://github.com/marlersoft/zigwin32/archive/main.tar.gz",
-            .hash = "1220f8d5028adceac0c6fc8ef554d82efef49ca48913393e9c2f5d73a66b58c8aaad",
+            .hash = "1220fef3f28aa38623af7dd72e156194999e6a019479d07268e9d77c710aaa8e9e0f",
         },
     },
 }
